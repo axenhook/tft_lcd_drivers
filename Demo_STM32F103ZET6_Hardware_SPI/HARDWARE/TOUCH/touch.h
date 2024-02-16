@@ -100,7 +100,7 @@ u16 TP_Read_XOY(u8 xy);                         //带滤波的坐标读取(X/Y)
 u8 TP_Read_XY(u16 *x, u16 *y);                  //双方向读取(X+Y)
 u8 TP_Read_XY2(u16 *x, u16 *y);                 //带加强滤波的双方向坐标读取
 void TP_Drow_Touch_Point(u16 x, u16 y, u16 color); //画一个坐标校准点
-void TP_Draw_Big_Point(u16 x, u16 y, u16 color); //画一个大点
+void gui_draw_big_point(u16 x, u16 y, u16 color); //画一个大点
 u8 TP_Scan(u8 tp);                              //扫描
 void TP_Save_Adjdata(void);                     //保存校准参数
 u8 TP_Get_Adjdata(void);                        //读取校准参数

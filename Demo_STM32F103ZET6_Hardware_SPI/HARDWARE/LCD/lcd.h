@@ -142,10 +142,9 @@ void LCD_DisplayOn(void);
 void LCD_DisplayOff(void);
 void LCD_Clear(u16 Color);
 void LCD_SetCursor(u16 Xpos, u16 Ypos);
-void LCD_DrawPoint(u16 x, u16 y); //画点
+void gui_draw_point(u16 x, u16 y); //画点
 u16  LCD_ReadPoint(u16 x, u16 y); //读点
-void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2);
-void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
+void gui_draw_line(u16 x1, u16 y1, u16 x2, u16 y2);
 void LCD_SetWindow(u16 sx, u16 sy, u16 width, u16 height);
 
 u16 LCD_RD_DATA(void);//读取LCD数据
@@ -159,15 +158,13 @@ u16 LCD_BGR2RGB(u16 c);
 void LCD_SetParam(void);
 void LCD_WriteWord(u16 Data);
 void LCD_Direction(u8 direction);
-void LCD_DrawPointColor(u16 x, u16 y, u16 color);
-void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color);
-void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2);
-void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
+void gui_draw_point_color(u16 x, u16 y, u16 color);
+void gui_fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color);
+void gui_draw_line(u16 x1, u16 y1, u16 x2, u16 y2);
 void Draw_Circle(u16 x0, u16 y0, u16 fc, u8 r);
-void LCD_DrawTriangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
-void LCD_DrawTriangleFill(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
-void LCD_DrawCircle(int xc, int yc, u16 c, int r, int fill);
-void LCD_DrawFillRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
+void gui_draw_triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
+void gui_fill_triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
+void gui_draw_circle(int xc, int yc, u16 c, int r, int fill);
 void LCD_ShowPicture(u16 x, u16 y, u16 width, u16 height, const u8 *pic);
 
 //如果仍然觉得速度不够快，可以使用下面的宏定义,提高速度.

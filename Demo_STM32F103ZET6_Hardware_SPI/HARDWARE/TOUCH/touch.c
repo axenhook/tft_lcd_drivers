@@ -259,17 +259,17 @@ u8 TP_Read_XY2(u16 *x, u16 *y)
 void TP_Drow_Touch_Point(u16 x, u16 y, u16 color)
 {
     PAINT_COLOR = color;
-    LCD_DrawLine(x - 12, y, x + 13, y); //横线
-    LCD_DrawLine(x, y - 12, x, y + 13); //竖线
-    LCD_DrawPoint(x + 1, y + 1);
-    LCD_DrawPoint(x - 1, y + 1);
-    LCD_DrawPoint(x + 1, y - 1);
-    LCD_DrawPoint(x - 1, y - 1);
-    LCD_DrawCircle(x, y, PAINT_COLOR, 6, 0); //画中心圈
+    gui_draw_line(x - 12, y, x + 13, y); //横线
+    gui_draw_line(x, y - 12, x, y + 13); //竖线
+    gui_draw_point(x + 1, y + 1);
+    gui_draw_point(x - 1, y + 1);
+    gui_draw_point(x + 1, y - 1);
+    gui_draw_point(x - 1, y - 1);
+    gui_draw_circle(x, y, PAINT_COLOR, 6, 0); //画中心圈
 }
 
 /*****************************************************************************
- * @name       :void TP_Draw_Big_Point(u16 x,u16 y,u16 color)
+ * @name       :void gui_draw_big_point(u16 x,u16 y,u16 color)
  * @date       :2018-08-09
  * @function   :Draw a big point(2*2)
  * @parameters :x:Read x coordinate of the point
@@ -277,14 +277,6 @@ void TP_Drow_Touch_Point(u16 x, u16 y, u16 color)
                                 color:the color value of the point
  * @retvalue   :None
 ******************************************************************************/
-void TP_Draw_Big_Point(u16 x, u16 y, u16 color)
-{
-    PAINT_COLOR = color;
-    LCD_DrawPoint(x, y); //中心点
-    LCD_DrawPoint(x + 1, y);
-    LCD_DrawPoint(x, y + 1);
-    LCD_DrawPoint(x + 1, y + 1);
-}
 
 /*****************************************************************************
  * @name       :u8 TP_Scan(u8 tp)
@@ -420,24 +412,24 @@ const u8 *TP_REMIND_MSG_TBL = "Please use the stylus click the cross on the scre
 void TP_Adj_Info_Show(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2, u16 x3, u16 y3, u16 fac)
 {
     PAINT_COLOR = RED;
-    LCD_ShowString(40, 140, 16, "x1:", 1);
-    LCD_ShowString(40 + 80, 140, 16, "y1:", 1);
-    LCD_ShowString(40, 160, 16, "x2:", 1);
-    LCD_ShowString(40 + 80, 160, 16, "y2:", 1);
-    LCD_ShowString(40, 180, 16, "x3:", 1);
-    LCD_ShowString(40 + 80, 180, 16, "y3:", 1);
-    LCD_ShowString(40, 200, 16, "x4:", 1);
-    LCD_ShowString(40 + 80, 200, 16, "y4:", 1);
-    LCD_ShowString(40, 220, 16, "fac is:", 1);
-    LCD_ShowNum(40 + 24, 140, x0, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24 + 80, 140, y0, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24, 160, x1, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24 + 80, 160, y1, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24, 180, x2, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24 + 80, 180, y2, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24, 200, x3, 4, 16); //显示数值
-    LCD_ShowNum(40 + 24 + 80, 200, y3, 4, 16); //显示数值
-    LCD_ShowNum(40 + 56, 220, fac, 3, 16); //显示数值,该数值必须在95~105范围之内.
+    gui_show_ptstring(40, 140, 16, "x1:", 1);
+    gui_show_ptstring(40 + 80, 140, 16, "y1:", 1);
+    gui_show_ptstring(40, 160, 16, "x2:", 1);
+    gui_show_ptstring(40 + 80, 160, 16, "y2:", 1);
+    gui_show_ptstring(40, 180, 16, "x3:", 1);
+    gui_show_ptstring(40 + 80, 180, 16, "y3:", 1);
+    gui_show_ptstring(40, 200, 16, "x4:", 1);
+    gui_show_ptstring(40 + 80, 200, 16, "y4:", 1);
+    gui_show_ptstring(40, 220, 16, "fac is:", 1);
+    gui_show_num(40 + 24, 140, x0, 4, 16); //显示数值
+    gui_show_num(40 + 24 + 80, 140, y0, 4, 16); //显示数值
+    gui_show_num(40 + 24, 160, x1, 4, 16); //显示数值
+    gui_show_num(40 + 24 + 80, 160, y1, 4, 16); //显示数值
+    gui_show_num(40 + 24, 180, x2, 4, 16); //显示数值
+    gui_show_num(40 + 24 + 80, 180, y2, 4, 16); //显示数值
+    gui_show_num(40 + 24, 200, x3, 4, 16); //显示数值
+    gui_show_num(40 + 24 + 80, 200, y3, 4, 16); //显示数值
+    gui_show_num(40 + 56, 220, fac, 3, 16); //显示数值,该数值必须在95~105范围之内.
 }
 
 /*****************************************************************************
@@ -462,11 +454,11 @@ void TP_Adjust(void)
     PAINT_COLOR = RED; //红色
     LCD_Clear(WHITE);//清屏
     PAINT_COLOR = BLACK;
-    LCD_ShowString(10, 40, 16, "Please use the stylus click", 1); //显示提示信息
-    LCD_ShowString(10, 56, 16, "the cross on the screen.", 1); //显示提示信息
-    LCD_ShowString(10, 72, 16, "The cross will always move", 1); //显示提示信息
-    LCD_ShowString(10, 88, 16, "until the screen adjustment", 1); //显示提示信息
-    LCD_ShowString(10, 104, 16, "is completed.", 1); //显示提示信息
+    gui_show_ptstring(10, 40, 16, "Please use the stylus click", 1); //显示提示信息
+    gui_show_ptstring(10, 56, 16, "the cross on the screen.", 1); //显示提示信息
+    gui_show_ptstring(10, 72, 16, "The cross will always move", 1); //显示提示信息
+    gui_show_ptstring(10, 88, 16, "until the screen adjustment", 1); //显示提示信息
+    gui_show_ptstring(10, 104, 16, "is completed.", 1); //显示提示信息
 
     TP_Drow_Touch_Point(20, 20, RED); //画点1
     tp_dev.sta = 0; //消除触发信号
@@ -571,7 +563,7 @@ void TP_Adjust(void)
                         cnt = 0;
                         TP_Drow_Touch_Point(lcddev.width - 20, lcddev.height - 20, WHITE); //清除点4
                         TP_Drow_Touch_Point(20, 20, RED);                           //画点1
-                        LCD_ShowString(40, 26, 16, "TP Need readjust!", 1);
+                        gui_show_ptstring(40, 26, 16, "TP Need readjust!", 1);
                         tp_dev.touchtype = !tp_dev.touchtype; //修改触屏类型.
                         if (tp_dev.touchtype) //X,Y方向与屏幕相反
                         {
@@ -587,7 +579,7 @@ void TP_Adjust(void)
                     }
                     PAINT_COLOR = BLUE;
                     LCD_Clear(WHITE);//清屏
-                    LCD_ShowString(35, 110, 16, "Touch Screen Adjust OK!", 1); //校正完成
+                    gui_show_ptstring(35, 110, 16, "Touch Screen Adjust OK!", 1); //校正完成
                     delay_ms(1000);
                     TP_Save_Adjdata();
                     LCD_Clear(WHITE);//清屏

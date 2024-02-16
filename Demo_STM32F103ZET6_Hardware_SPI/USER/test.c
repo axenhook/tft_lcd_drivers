@@ -76,14 +76,14 @@ void DrawTestPage(u8 *str)
 {
     //绘制固定栏up
     LCD_Clear(WHITE);
-    LCD_Fill(0, 0, lcddev.width, 20, BLUE);
+    gui_fill(0, 0, lcddev.width, 20, BLUE);
     //绘制固定栏down
-    LCD_Fill(0, lcddev.height - 20, lcddev.width, lcddev.height, BLUE);
+    gui_fill(0, lcddev.height - 20, lcddev.width, lcddev.height, BLUE);
     PAINT_COLOR = WHITE;
-    LCD_ShowStringCenter(0, 2, WHITE, BLUE, str, 16, 1); //居中显示
-    LCD_ShowStringCenter(0, lcddev.height - 18, WHITE, BLUE, "http://www.lcdwiki.com", 16, 1); //居中显示
+    gui_show_string_center(0, 2, WHITE, BLUE, str, 16, 1); //居中显示
+    gui_show_string_center(0, lcddev.height - 18, WHITE, BLUE, "http://www.lcdwiki.com", 16, 1); //居中显示
     //绘制测试区域
-    //LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+    //gui_fill(0,20,lcddev.width,lcddev.height-20,WHITE);
 }
 
 /*****************************************************************************
@@ -96,10 +96,10 @@ void DrawTestPage(u8 *str)
 void main_test(void)
 {
     DrawTestPage("全动电子综合测试程序");
-    LCD_ShowStringCenter(0, 30, RED, BLUE, "全动电子", 16, 1); //居中显示
-    LCD_ShowStringCenter(0, 60, RED, BLUE, "综合测试程序", 16, 1); //居中显示
-    LCD_ShowStringCenter(0, 90, GREEN, BLUE, "2.4\" ILI9341 240X320", 16, 1); //居中显示
-    LCD_ShowStringCenter(0, 120, BLUE, BLUE, "xiaoFeng@QDtech 2018-08-20", 16, 1); //居中显示
+    gui_show_string_center(0, 30, RED, BLUE, "全动电子", 16, 1); //居中显示
+    gui_show_string_center(0, 60, RED, BLUE, "综合测试程序", 16, 1); //居中显示
+    gui_show_string_center(0, 90, GREEN, BLUE, "2.4\" ILI9341 240X320", 16, 1); //居中显示
+    gui_show_string_center(0, 120, BLUE, BLUE, "xiaoFeng@QDtech 2018-08-20", 16, 1); //居中显示
     delay_ms(1500);
     delay_ms(1500);
 }
@@ -114,17 +114,17 @@ void main_test(void)
 void Test_Color(void)
 {
     //DrawTestPage("测试1:纯色填充测试");
-    LCD_Fill(0, 0, lcddev.width, lcddev.height, WHITE);
-    LCD_ShowHzString(20, 30, BLUE, YELLOW, "BL Test", 16, 1);
+    gui_fill(0, 0, lcddev.width, lcddev.height, WHITE);
+    gui_show_string(20, 30, BLUE, YELLOW, "BL Test", 16, 1);
     delay_ms(800);
-    LCD_Fill(0, 0, lcddev.width, lcddev.height, RED);
-    LCD_ShowHzString(20, 30, BLUE, YELLOW, "RED ", 16, 1);
+    gui_fill(0, 0, lcddev.width, lcddev.height, RED);
+    gui_show_string(20, 30, BLUE, YELLOW, "RED ", 16, 1);
     delay_ms(800);
-    LCD_Fill(0, 0, lcddev.width, lcddev.height, GREEN);
-    LCD_ShowHzString(20, 30, BLUE, YELLOW, "GREEN ", 16, 1);
+    gui_fill(0, 0, lcddev.width, lcddev.height, GREEN);
+    gui_show_string(20, 30, BLUE, YELLOW, "GREEN ", 16, 1);
     delay_ms(800);
-    LCD_Fill(0, 0, lcddev.width, lcddev.height, BLUE);
-    LCD_ShowHzString(20, 30, RED, YELLOW, "BLUE ", 16, 1);
+    gui_fill(0, 0, lcddev.width, lcddev.height, BLUE);
+    gui_show_string(20, 30, RED, YELLOW, "BLUE ", 16, 1);
     delay_ms(800);
 }
 
@@ -142,18 +142,18 @@ void Test_FillRec(void)
 {
     u8 i = 0;
     DrawTestPage("测试2:GUI矩形填充测试");
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
         PAINT_COLOR = ColorTab[i];
-        LCD_DrawRectangle(lcddev.width / 2 - 80 + (i * 15), lcddev.height / 2 - 80 + (i * 15), lcddev.width / 2 - 80 + (i * 15) + 60, lcddev.height / 2 - 80 + (i * 15) + 60);
+        gui_draw_rectangle(lcddev.width / 2 - 80 + (i * 15), lcddev.height / 2 - 80 + (i * 15), 60, 60);
     }
     delay_ms(1500);
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
         PAINT_COLOR = ColorTab[i];
-        LCD_DrawFillRectangle(lcddev.width / 2 - 80 + (i * 15), lcddev.height / 2 - 80 + (i * 15), lcddev.width / 2 - 80 + (i * 15) + 60, lcddev.height / 2 - 80 + (i * 15) + 60);
+        gui_fill_rectangle(lcddev.width / 2 - 80 + (i * 15), lcddev.height / 2 - 80 + (i * 15), 60, 60);
     }
     delay_ms(1500);
 }
@@ -172,16 +172,16 @@ void Test_Circle(void)
 {
     u8 i = 0;
     DrawTestPage("测试3:GUI画圆填充测试");
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
-        LCD_DrawCircle(lcddev.width / 2 - 80 + (i * 25), lcddev.height / 2 - 50 + (i * 25), ColorTab[i], 30, 0);
+        gui_draw_circle(lcddev.width / 2 - 80 + (i * 25), lcddev.height / 2 - 50 + (i * 25), ColorTab[i], 30, 0);
     }
     delay_ms(1500);
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
-        LCD_DrawCircle(lcddev.width / 2 - 80 + (i * 25), lcddev.height / 2 - 50 + (i * 25), ColorTab[i], 30, 1);
+        gui_draw_circle(lcddev.width / 2 - 80 + (i * 25), lcddev.height / 2 - 50 + (i * 25), ColorTab[i], 30, 1);
     }
     delay_ms(1500);
 }
@@ -196,12 +196,12 @@ void Test_Circle(void)
 void English_Font_test(void)
 {
     DrawTestPage("测试5:英文显示测试");
-    LCD_ShowHzString(10, 30, BLUE, YELLOW, "6X12:abcdefghijklmnopqrstuvwxyz0123456789", 12, 0);
-    LCD_ShowHzString(10, 45, BLUE, YELLOW, "6X12:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 12, 1);
-    LCD_ShowHzString(10, 60, BLUE, YELLOW, "6X12:~!@#$%^&*()_+{}:<>?/|-+.", 12, 0);
-    LCD_ShowHzString(10, 80, BLUE, YELLOW, "8X16:abcdefghijklmnopqrstuvwxyz0123456789", 16, 0);
-    LCD_ShowHzString(10, 100, BLUE, YELLOW, "8X16:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 16, 1);
-    LCD_ShowHzString(10, 120, BLUE, YELLOW, "8X16:~!@#$%^&*()_+{}:<>?/|-+.", 16, 0);
+    gui_show_string(10, 30, BLUE, YELLOW, "6X12:abcdefghijklmnopqrstuvwxyz0123456789", 12, 0);
+    gui_show_string(10, 45, BLUE, YELLOW, "6X12:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 12, 1);
+    gui_show_string(10, 60, BLUE, YELLOW, "6X12:~!@#$%^&*()_+{}:<>?/|-+.", 12, 0);
+    gui_show_string(10, 80, BLUE, YELLOW, "8X16:abcdefghijklmnopqrstuvwxyz0123456789", 16, 0);
+    gui_show_string(10, 100, BLUE, YELLOW, "8X16:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 16, 1);
+    gui_show_string(10, 120, BLUE, YELLOW, "8X16:~!@#$%^&*()_+{}:<>?/|-+.", 16, 0);
     delay_ms(1200);
 }
 
@@ -219,18 +219,18 @@ void Test_Triangle(void)
 {
     u8 i = 0;
     DrawTestPage("测试4:GUI Triangle填充测试");
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
         PAINT_COLOR = ColorTab[i];
-        LCD_DrawTriangle(lcddev.width / 2 - 80 + (i * 20), lcddev.height / 2 - 20 + (i * 15), lcddev.width / 2 - 50 - 1 + (i * 20), lcddev.height / 2 - 20 - 52 - 1 + (i * 15), lcddev.width / 2 - 20 - 1 + (i * 20), lcddev.height / 2 - 20 + (i * 15));
+        gui_draw_triangle(lcddev.width / 2 - 80 + (i * 20), lcddev.height / 2 - 20 + (i * 15), lcddev.width / 2 - 50 - 1 + (i * 20), lcddev.height / 2 - 20 - 52 - 1 + (i * 15), lcddev.width / 2 - 20 - 1 + (i * 20), lcddev.height / 2 - 20 + (i * 15));
     }
     delay_ms(1500);
-    LCD_Fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
+    gui_fill(0, 20, lcddev.width, lcddev.height - 20, WHITE);
     for (i = 0; i < 5; i++)
     {
         PAINT_COLOR = ColorTab[i];
-        LCD_DrawTriangleFill(lcddev.width / 2 - 80 + (i * 20), lcddev.height / 2 - 20 + (i * 15), lcddev.width / 2 - 50 - 1 + (i * 20), lcddev.height / 2 - 20 - 52 - 1 + (i * 15), lcddev.width / 2 - 20 - 1 + (i * 20), lcddev.height / 2 - 20 + (i * 15));
+        gui_fill_triangle(lcddev.width / 2 - 80 + (i * 20), lcddev.height / 2 - 20 + (i * 15), lcddev.width / 2 - 50 - 1 + (i * 20), lcddev.height / 2 - 20 - 52 - 1 + (i * 15), lcddev.width / 2 - 20 - 1 + (i * 20), lcddev.height / 2 - 20 + (i * 15));
     }
     delay_ms(1500);
 }
@@ -245,10 +245,10 @@ void Test_Triangle(void)
 void Chinese_Font_test(void)
 {
     DrawTestPage("测试6:中文显示测试");
-    LCD_ShowHzString(10, 30, BLUE, YELLOW, "16X16:全动电子技术有限公司欢迎您", 16, 0);
-    LCD_ShowHzString(10, 50, BLUE, YELLOW, "16X16:Welcome全动电子", 16, 0);
-    LCD_ShowHzString(10, 70, BLUE, YELLOW, "24X24:深圳市中文测试", 24, 1);
-    LCD_ShowHzString(10, 100, BLUE, YELLOW, "32X32:字体测试", 32, 1);
+    gui_show_string(10, 30, BLUE, YELLOW, "16X16:全动电子技术有限公司欢迎您", 16, 0);
+    gui_show_string(10, 50, BLUE, YELLOW, "16X16:Welcome全动电子", 16, 0);
+    gui_show_string(10, 70, BLUE, YELLOW, "24X24:深圳市中文测试", 24, 1);
+    gui_show_string(10, 100, BLUE, YELLOW, "32X32:字体测试", 32, 1);
     delay_ms(1200);
 }
 
@@ -262,13 +262,13 @@ void Chinese_Font_test(void)
 void Pic_test(void)
 {
     DrawTestPage("测试7:图片显示测试");
-    //LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+    //gui_fill(0,20,lcddev.width,lcddev.height-20,WHITE);
     LCD_ShowPicture(30, 30, 40, 40, gImage_qq);
-    LCD_ShowHzString(30 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
+    gui_show_string(30 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
     LCD_ShowPicture(90, 30, 40, 40, gImage_qq);
-    LCD_ShowHzString(90 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
+    gui_show_string(90 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
     LCD_ShowPicture(150, 30, 40, 40, gImage_qq);
-    LCD_ShowHzString(150 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
+    gui_show_string(150 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
     delay_ms(1200);
 }
 
@@ -288,7 +288,7 @@ void Rotate_Test(void)
     {
         LCD_Direction(i);
         DrawTestPage("测试8:屏幕旋转测试");
-        LCD_ShowHzString(20, 30, BLUE, YELLOW, Direction[i], 16, 1);
+        gui_show_string(20, 30, BLUE, YELLOW, Direction[i], 16, 1);
         LCD_ShowPicture(30, 50, 40, 40, gImage_qq);
         delay_ms(1000);
         delay_ms(1000);
@@ -313,9 +313,9 @@ void Touch_Test(void)
     KEY_Init();
     LED_Init();
     DrawTestPage("测试9:Touch(按KEY0校准)      ");
-    LCD_ShowString(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
+    gui_show_ptstring(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
     PAINT_COLOR = RED;
-    LCD_Fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, RED);
+    gui_fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, RED);
     while (1)
     {
         key = KEY_Scan();
@@ -327,13 +327,13 @@ void Touch_Test(void)
                 if (tp_dev.x > (lcddev.width - 24) && tp_dev.y < 16)
                 {
                     DrawTestPage("测试9:Touch(按KEY0校准)      ");//清除
-                    LCD_ShowString(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
+                    gui_show_ptstring(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
                     PAINT_COLOR = colorTemp;
-                    LCD_Fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, PAINT_COLOR);
+                    gui_fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, PAINT_COLOR);
                 }
                 else if ((tp_dev.x > (lcddev.width - 60) && tp_dev.x < (lcddev.width - 50 + 20)) && tp_dev.y < 20)
                 {
-                    LCD_Fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, ColorTab[j % 5]);
+                    gui_fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, ColorTab[j % 5]);
                     PAINT_COLOR = ColorTab[(j++) % 5];
                     colorTemp = PAINT_COLOR;
                     delay_ms(10);
@@ -341,7 +341,7 @@ void Touch_Test(void)
 
                 else
                 {
-                    TP_Draw_Big_Point(tp_dev.x, tp_dev.y, PAINT_COLOR);    //画图
+                    gui_draw_big_point(tp_dev.x, tp_dev.y, PAINT_COLOR);    //画图
                 }
             }
         }
@@ -356,9 +356,9 @@ void Touch_Test(void)
             TP_Adjust();  //屏幕校准
             TP_Save_Adjdata();
             DrawTestPage("测试9:Touch(按KEY0校准)      ");
-            LCD_ShowString(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
+            gui_show_ptstring(lcddev.width - 24, 0, 16, "RST", 1); //显示清屏区域
             PAINT_COLOR = colorTemp;
-            LCD_Fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, PAINT_COLOR);
+            gui_fill(lcddev.width - 52, 2, lcddev.width - 50 + 20, 18, PAINT_COLOR);
         }
         i++;
         if (i == 30)

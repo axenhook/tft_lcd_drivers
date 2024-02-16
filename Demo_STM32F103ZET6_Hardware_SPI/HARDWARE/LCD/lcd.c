@@ -64,7 +64,6 @@ _lcd_dev lcddev;
 
 //画笔颜色,背景颜色
 u16 PAINT_COLOR = 0x0000, BACK_COLOR = 0xFFFF;
-u16 DeviceCode;
 
 //写寄存器函数
 //reg:寄存器值
@@ -91,6 +90,23 @@ void LCD_WriteWord(u16 color)
     SPI_WriteByte(SPI2, color >> 8);
     SPI_WriteByte(SPI2, color);
     LCD_CS_SET();
+}
+
+/*****************************************************************************
+ * @name       :void LCD_GPIOInit(void)
+ * @date       :2018-08-09
+ * @function   :Initialization LCD screen GPIO
+ * @parameters :None
+ * @retvalue   :None
+******************************************************************************/
+void LCD_GPIOInit(void)
+{
+    GPIO_InitTypeDef  GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	//使能GPIOB时钟
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12; //GPIOB9,10,11,12
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   //推挽输出
+    GPIO_Init(GPIOB, &GPIO_InitStructure);//初始化
 }
 
 void LCD_WriteReg(u8 reg, u16 value)
@@ -133,6 +149,21 @@ void LCD_WriteRAM_Prepare(void)
     LCD_SelectReg(lcddev.wramcmd);
 }
 
+/*****************************************************************************
+ * @name       :void LCD_RESET(void)
+ * @date       :2018-08-09
+ * @function   :Reset LCD screen
+ * @parameters :None
+ * @retvalue   :None
+******************************************************************************/
+void LCD_RESET(void)
+{
+    LCD_RST_CLR();
+    delay_ms(100);
+    LCD_RST_SET();
+    delay_ms(50);
+}
+
 //清屏函数
 //color:要清屏的填充色
 void LCD_Clear(u16 Color)
@@ -148,500 +179,6 @@ void LCD_Clear(u16 Color)
             LCD_WriteWord(Color);
         }
     }
-}
-
-//在指定区域内填充单个颜色
-//(sx,sy),(ex,ey):填充矩形对角坐标,区域大小为:(ex-sx+1)*(ey-sy+1)
-//color:要填充的颜色
-void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color)
-{
-    u16 i, j;
-    u16 width = ex - sx + 1; //得到填充的宽度
-    u16 height = ey - sy + 1; //高度
-    
-    LCD_SetWindow(sx, sy, width, height); //设置显示窗口
-    
-    for (i = 0; i < height; i++)
-    {
-        for (j = 0; j < width; j++)
-        {
-            LCD_WriteWord(color);    //写入数据
-        }
-    }
-    
-    LCD_SetWindow(0, 0, lcddev.width, lcddev.height); //恢复窗口设置为全屏
-}
-
-
-//在指定区域内填充指定颜色块
-//(sx,sy),(ex,ey):填充矩形对角坐标,区域大小为:(ex-sx+1)*(ey-sy+1)
-//color:要填充的颜色
-void LCD_FillColor(u16 sx, u16 sy, u16 ex, u16 ey, u16 *color)
-{
-    u16 height, width;
-    u16 i, j;
-    
-    width = ex - sx + 1;    //得到填充的宽度
-    height = ey - sy + 1;   //高度
-    
-    LCD_SetWindow(sx, sy, ex, ey);
-    
-    for (i = 0; i < height; i++)
-    {
-        for (j = 0; j < width; j++)
-        {
-            LCD_WriteWord(color[i * width + j]);
-        }
-    }
-}
-
-//画点
-//x,y:坐标
-//PAINT_COLOR:此点的颜色
-void LCD_DrawPoint(u16 x, u16 y)
-{
-    LCD_SetWindow(x, y, 1, 1);  //设置点的位置
-    LCD_WriteWord(PAINT_COLOR);
-}
-
-//快速画点
-//x,y:坐标
-//color:颜色
-void LCD_DrawPointColor(u16 x, u16 y, u16 color)
-{
-    LCD_SetWindow(x, y, 1, 1);  //设置点的位置
-    LCD_WriteWord(color);
-}
-
-//画一个大点
-//2*2的点
-void LCD_DrawBigPoint(u16 x, u16 y, u16 color)
-{
-    LCD_DrawPointColor(x, y, color); //中心点
-    LCD_DrawPointColor(x + 1, y, color);
-    LCD_DrawPointColor(x, y + 1, color);
-    LCD_DrawPointColor(x + 1, y + 1, color);
-}
-
-//画线
-//x1,y1:起点坐标
-//x2,y2:终点坐标
-void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2)
-{
-    u16 t;
-    int xerr = 0, yerr = 0, delta_x, delta_y, distance;
-    int incx, incy, uRow, uCol;
-
-    delta_x = x2 - x1; //计算坐标增量
-    delta_y = y2 - y1;
-    uRow = x1;
-    uCol = y1;
-    if (delta_x > 0)
-    {
-        incx = 1;    //设置单步方向
-    }
-    else if (delta_x == 0)
-    {
-        incx = 0;    //垂直线
-    }
-    else
-    {
-        incx = -1;
-        delta_x = -delta_x;
-    }
-    if (delta_y > 0)
-    {
-        incy = 1;
-    }
-    else if (delta_y == 0)
-    {
-        incy = 0;    //水平线
-    }
-    else
-    {
-        incy = -1;
-        delta_y = -delta_y;
-    }
-    if (delta_x > delta_y)
-    {
-        distance = delta_x;    //选取基本增量坐标轴
-    }
-    else
-    {
-        distance = delta_y;
-    }
-    for (t = 0; t <= distance + 1; t++) //画线输出
-    {
-        LCD_DrawPoint(uRow, uCol); //画点
-        xerr += delta_x ;
-        yerr += delta_y ;
-        if (xerr > distance)
-        {
-            xerr -= distance;
-            uRow += incx;
-        }
-        if (yerr > distance)
-        {
-            yerr -= distance;
-            uCol += incy;
-        }
-    }
-}
-
-void LCD_DrawLineColor(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
-{
-    u16 t;
-    int xerr = 0, yerr = 0, delta_x, delta_y, distance;
-    int incx, incy, uRow, uCol;
-    delta_x = x2 - x1; //计算坐标增量
-    delta_y = y2 - y1;
-    uRow = x1;
-    uCol = y1;
-    if (delta_x > 0)
-    {
-        incx = 1;    //设置单步方向
-    }
-    else if (delta_x == 0)
-    {
-        incx = 0;    //垂直线
-    }
-    else
-    {
-        incx = -1;
-        delta_x = -delta_x;
-    }
-    if (delta_y > 0)
-    {
-        incy = 1;
-    }
-    else if (delta_y == 0)
-    {
-        incy = 0;    //水平线
-    }
-    else
-    {
-        incy = -1;
-        delta_y = -delta_y;
-    }
-    if (delta_x > delta_y)
-    {
-        distance = delta_x;    //选取基本增量坐标轴
-    }
-    else
-    {
-        distance = delta_y;
-    }
-    for (t = 0; t <= distance + 1; t++) //画线输出
-    {
-        LCD_DrawPointColor(uRow, uCol, color); //画点
-        xerr += delta_x ;
-        yerr += delta_y ;
-        if (xerr > distance)
-        {
-            xerr -= distance;
-            uRow += incx;
-        }
-        if (yerr > distance)
-        {
-            yerr -= distance;
-            uCol += incy;
-        }
-    }
-}
-
-
-// 画一个十字的标记
-// x：标记的X坐标
-// y：标记的Y坐标
-// color：标记的颜色
-void LCD_DrawSign(u16 x, u16 y, u16 color)
-{
-    u8 i;
-
-    /* 画点 */
-    LCD_SetWindow(x - 1, y - 1, x + 1, y + 1);
-    for (i = 0; i < 9; i++)
-    {
-        LCD_WriteWord(color);
-    }
-
-    /* 画竖 */
-    LCD_SetWindow(x - 4, y, x + 4, y);
-    for (i = 0; i < 9; i++)
-    {
-        LCD_WriteWord(color);
-    }
-
-    /* 画横 */
-    LCD_SetWindow(x, y - 4, x, y + 4);
-    for (i = 0; i < 9; i++)
-    {
-        LCD_WriteWord(color);
-    }
-}
-
-//画矩形
-//(x1,y1),(x2,y2):矩形的对角坐标
-void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2)
-{
-    LCD_DrawLine(x1, y1, x2, y1);
-    LCD_DrawLine(x1, y1, x1, y2);
-    LCD_DrawLine(x1, y2, x2, y2);
-    LCD_DrawLine(x2, y1, x2, y2);
-}
-
-/*****************************************************************************
- * @name       :void LCD_DrawFillRectangle(u16 x1, u16 y1, u16 x2, u16 y2)
- * @date       :2018-08-09
- * @function   :Filled a rectangle
- * @parameters :x1:the bebinning x coordinate of the filled rectangle
-                y1:the bebinning y coordinate of the filled rectangle
-                                x2:the ending x coordinate of the filled rectangle
-                                y2:the ending y coordinate of the filled rectangle
- * @retvalue   :None
-******************************************************************************/
-void LCD_DrawFillRectangle(u16 x1, u16 y1, u16 x2, u16 y2)
-{
-    LCD_Fill(x1, y1, x2, y2, PAINT_COLOR);
-}
-
-/*****************************************************************************
- * @name       :void LCD_DrawTriangle(u16 x0,u16 y0,u16 x1,u16 y1,u16 x2,u16 y2)
- * @date       :2018-08-09
- * @function   :Draw a triangle at a specified position
- * @parameters :x0:the bebinning x coordinate of the triangular edge
-                y0:the bebinning y coordinate of the triangular edge
-                                x1:the vertex x coordinate of the triangular
-                                y1:the vertex y coordinate of the triangular
-                                x2:the ending x coordinate of the triangular edge
-                                y2:the ending y coordinate of the triangular edge
- * @retvalue   :None
-******************************************************************************/
-void LCD_DrawTriangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
-{
-    LCD_DrawLine(x0, y0, x1, y1);
-    LCD_DrawLine(x1, y1, x2, y2);
-    LCD_DrawLine(x2, y2, x0, y0);
-}
-
-static void _swap(u16 *a, u16 *b)
-{
-    u16 tmp;
-    tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
-/*****************************************************************************
- * @name       :void LCD_DrawTriangleFill(u16 x0,u16 y0,u16 x1,u16 y1,u16 x2,u16 y2)
- * @date       :2018-08-09
- * @function   :filling a triangle at a specified position
- * @parameters :x0:the bebinning x coordinate of the triangular edge
-                y0:the bebinning y coordinate of the triangular edge
-                                x1:the vertex x coordinate of the triangular
-                                y1:the vertex y coordinate of the triangular
-                                x2:the ending x coordinate of the triangular edge
-                                y2:the ending y coordinate of the triangular edge
- * @retvalue   :None
-******************************************************************************/
-void LCD_DrawTriangleFill(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
-{
-    u16 a, b, y, last;
-    int dx01, dy01, dx02, dy02, dx12, dy12;
-    long sa = 0;
-    long sb = 0;
-    if (y0 > y1)
-    {
-        _swap(&y0, &y1);
-        _swap(&x0, &x1);
-    }
-    if (y1 > y2)
-    {
-        _swap(&y2, &y1);
-        _swap(&x2, &x1);
-    }
-    if (y0 > y1)
-    {
-        _swap(&y0, &y1);
-        _swap(&x0, &x1);
-    }
-    if (y0 == y2)
-    {
-        a = b = x0;
-        if (x1 < a)
-        {
-            a = x1;
-        }
-        else if (x1 > b)
-        {
-            b = x1;
-        }
-        if (x2 < a)
-        {
-            a = x2;
-        }
-        else if (x2 > b)
-        {
-            b = x2;
-        }
-        LCD_Fill(a, y0, b, y0, PAINT_COLOR);
-        return;
-    }
-    dx01 = x1 - x0;
-    dy01 = y1 - y0;
-    dx02 = x2 - x0;
-    dy02 = y2 - y0;
-    dx12 = x2 - x1;
-    dy12 = y2 - y1;
-
-    if (y1 == y2)
-    {
-        last = y1;
-    }
-    else
-    {
-        last = y1 - 1;
-    }
-    for (y = y0; y <= last; y++)
-    {
-        a = x0 + sa / dy01;
-        b = x0 + sb / dy02;
-        sa += dx01;
-        sb += dx02;
-        if (a > b)
-        {
-            _swap(&a, &b);
-        }
-        LCD_Fill(a, y, b, y, PAINT_COLOR);
-    }
-    sa = dx12 * (y - y1);
-    sb = dx02 * (y - y0);
-    for (; y <= y2; y++)
-    {
-        a = x1 + sa / dy12;
-        b = x0 + sb / dy02;
-        sa += dx12;
-        sb += dx02;
-        if (a > b)
-        {
-            _swap(&a, &b);
-        }
-        LCD_Fill(a, y, b, y, PAINT_COLOR);
-    }
-}
-
-/*****************************************************************************
- * @name       :void _draw_circle_8(int xc, int yc, int x, int y, u16 c)
- * @date       :2018-08-09
- * @function   :8 symmetry circle drawing algorithm (internal call)
- * @parameters :xc:the x coordinate of the Circular center
-                yc:the y coordinate of the Circular center
-                                x:the x coordinate relative to the Circular center
-                                y:the y coordinate relative to the Circular center
-                                c:the color value of the circle
- * @retvalue   :None
-******************************************************************************/
-void _draw_circle_8(int xc, int yc, int x, int y, u16 c)
-{
-    LCD_DrawPointColor(xc + x, yc + y, c);
-
-    LCD_DrawPointColor(xc - x, yc + y, c);
-
-    LCD_DrawPointColor(xc + x, yc - y, c);
-
-    LCD_DrawPointColor(xc - x, yc - y, c);
-
-    LCD_DrawPointColor(xc + y, yc + x, c);
-
-    LCD_DrawPointColor(xc - y, yc + x, c);
-
-    LCD_DrawPointColor(xc + y, yc - x, c);
-
-    LCD_DrawPointColor(xc - y, yc - x, c);
-}
-
-//在指定位置画一个指定大小的圆
-//(x,y):中心点
-//r    :半径
-void LCD_DrawCircle(int xc, int yc, u16 c, int r, int fill)
-{
-    int x = 0, y = r, yi, d;
-
-    d = 3 - 2 * r;
-
-
-    if (fill)
-    {
-        // 如果填充（画实心圆）
-        while (x <= y)
-        {
-            for (yi = x; yi <= y; yi++)
-            {
-                _draw_circle_8(xc, yc, x, yi, c);
-            }
-
-            if (d < 0)
-            {
-                d = d + 4 * x + 6;
-            }
-            else
-            {
-                d = d + 4 * (x - y) + 10;
-                y--;
-            }
-            x++;
-        }
-    }
-    else
-    {
-        // 如果不填充（画空心圆）
-        while (x <= y)
-        {
-            _draw_circle_8(xc, yc, x, y, c);
-            if (d < 0)
-            {
-                d = d + 4 * x + 6;
-            }
-            else
-            {
-                d = d + 4 * (x - y) + 10;
-                y--;
-            }
-            x++;
-        }
-    }
-}
-
-/*****************************************************************************
- * @name       :void LCD_GPIOInit(void)
- * @date       :2018-08-09
- * @function   :Initialization LCD screen GPIO
- * @parameters :None
- * @retvalue   :None
-******************************************************************************/
-void LCD_GPIOInit(void)
-{
-    GPIO_InitTypeDef  GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	//使能GPIOB时钟
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12; //GPIOB9,10,11,12
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   //推挽输出
-    GPIO_Init(GPIOB, &GPIO_InitStructure);//初始化
-}
-
-/*****************************************************************************
- * @name       :void LCD_RESET(void)
- * @date       :2018-08-09
- * @function   :Reset LCD screen
- * @parameters :None
- * @retvalue   :None
-******************************************************************************/
-void LCD_RESET(void)
-{
-    LCD_RST_CLR();
-    delay_ms(100);
-    LCD_RST_SET();
-    delay_ms(50);
 }
 
 /*****************************************************************************
