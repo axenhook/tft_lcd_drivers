@@ -93,7 +93,8 @@ extern u16  BACK_COLOR; //背景颜色.默认为白色
 
 
 //QDtech全系列模块采用了三极管控制背光亮灭，用户也可以接PWM调节背光亮度
-#define LCD_BL_ON()     PBout(LED) = 1 //LCD背光             PB9
+#define LCD_BL_ON()      PBout(LED) = 1 //LCD背光             PB9
+#define LCD_BL_OFF()     PBout(LED) = 0 //LCD背光             PB9
 //如果使用官方库函数定义下列底层，速度将会下降到14帧每秒，建议采用我司推荐方法
 //以下IO定义直接操作寄存器，快速IO操作，刷屏速率可以达到28帧每秒！
 
@@ -145,25 +146,35 @@ void LCD_DrawPoint(u16 x, u16 y); //画点
 u16  LCD_ReadPoint(u16 x, u16 y); //读点
 void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2);
 void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
-void LCD_SetWindows(u16 xStar, u16 yStar, u16 xEnd, u16 yEnd);
+void LCD_SetWindow(u16 sx, u16 sy, u16 width, u16 height);
 
 u16 LCD_RD_DATA(void);//读取LCD数据
-void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue);
-void LCD_WR_DATA(u8 data);
+void LCD_WriteReg(u8 reg, u16 value);
+void LCD_WriteByte(u8 data);
 u16 LCD_ReadReg(u8 LCD_Reg);
 void LCD_WriteRAM_Prepare(void);
 void LCD_WriteRAM(u16 RGB_Code);
 u16 LCD_ReadRAM(void);
 u16 LCD_BGR2RGB(u16 c);
 void LCD_SetParam(void);
-void Lcd_WriteData_16Bit(u16 Data);
-void LCD_direction(u8 direction);
+void LCD_WriteWord(u16 Data);
+void LCD_Direction(u8 direction);
+void LCD_DrawPointColor(u16 x, u16 y, u16 color);
+void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color);
+void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2);
+void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
+void Draw_Circle(u16 x0, u16 y0, u16 fc, u8 r);
+void LCD_DrawTriangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
+void LCD_DrawTriangleFill(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
+void LCD_DrawCircle(int xc, int yc, u16 c, int r, int fill);
+void LCD_DrawFillRectangle(u16 x1, u16 y1, u16 x2, u16 y2);
+void LCD_ShowPicture(u16 x, u16 y, u16 width, u16 height, const u8 *pic);
 
 //如果仍然觉得速度不够快，可以使用下面的宏定义,提高速度.
-//注意要去掉lcd.c中void LCD_WR_DATA(u16 data)函数定义哦
+//注意要去掉lcd.c中void LCD_WriteByte(u16 data)函数定义哦
 /*
 #if LCD_USE8BIT_MODEL==1//使用8位并行数据总线模式
-    #define LCD_WR_DATA(data){\
+    #define LCD_WriteByte(data){\
     LCD_RS_SET();\
     LCD_CS_CLR();\
     DATAOUT(data);\
@@ -175,7 +186,7 @@ void LCD_direction(u8 direction);
     LCD_CS_SET();\
     }
     #else//使用16位并行数据总线模式
-    #define LCD_WR_DATA(data){\
+    #define LCD_WriteByte(data){\
     LCD_RS_SET();\
     LCD_CS_CLR();\
     DATAOUT(data);\

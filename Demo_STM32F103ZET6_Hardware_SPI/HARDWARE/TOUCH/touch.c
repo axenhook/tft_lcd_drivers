@@ -265,7 +265,7 @@ void TP_Drow_Touch_Point(u16 x, u16 y, u16 color)
     LCD_DrawPoint(x - 1, y + 1);
     LCD_DrawPoint(x + 1, y - 1);
     LCD_DrawPoint(x - 1, y - 1);
-    gui_circle(x, y, PAINT_COLOR, 6, 0); //画中心圈
+    LCD_DrawCircle(x, y, PAINT_COLOR, 6, 0); //画中心圈
 }
 
 /*****************************************************************************
