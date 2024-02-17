@@ -450,9 +450,9 @@ void TP_Adjust(void)
     cnt = 0;
     PAINT_COLOR = BLUE;
     BACK_COLOR = WHITE;
-    LCD_Clear(WHITE);//清屏
+    gui_clear(WHITE);//清屏
     PAINT_COLOR = RED; //红色
-    LCD_Clear(WHITE);//清屏
+    gui_clear(WHITE);//清屏
     PAINT_COLOR = BLACK;
     gui_show_ptstring(10, 40, 16, "Please use the stylus click", 1); //显示提示信息
     gui_show_ptstring(10, 56, 16, "the cross on the screen.", 1); //显示提示信息
@@ -578,11 +578,11 @@ void TP_Adjust(void)
                         continue;
                     }
                     PAINT_COLOR = BLUE;
-                    LCD_Clear(WHITE);//清屏
+                    gui_clear(WHITE);//清屏
                     gui_show_ptstring(35, 110, 16, "Touch Screen Adjust OK!", 1); //校正完成
                     delay_ms(1000);
                     TP_Save_Adjdata();
-                    LCD_Clear(WHITE);//清屏
+                    gui_clear(WHITE);//清屏
                     return;//校正完成
             }
         }
@@ -632,7 +632,7 @@ u8 TP_Init(void)
     }
     else               //未校准?
     {
-        LCD_Clear(WHITE);//清屏
+        gui_clear(WHITE);//清屏
         TP_Adjust();  //屏幕校准
         TP_Save_Adjdata();
     }

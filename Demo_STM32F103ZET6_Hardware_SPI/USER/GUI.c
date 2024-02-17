@@ -222,6 +222,23 @@ void gui_draw_hline(u16 x0, u16 y0, u16 len, u16 color)
     gui_fill(x0, y0, x0 + len - 1, y0, color);
 }
 
+//清屏函数
+//color:要清屏的填充色
+void gui_clear(u16 Color)
+{
+    unsigned int i, j;
+
+    LCD_SetWindow(0, 0, lcddev.width, lcddev.height);
+
+    for (i = 0; i < lcddev.height; i++)
+    {
+        for (j = 0; j < lcddev.width; j++)
+        {
+            LCD_WriteWord(Color);
+        }
+    }
+}
+
 //在指定区域内填充单个颜色
 //(sx,sy),(ex,ey):填充矩形对角坐标,区域大小为:(ex-sx+1)*(ey-sy+1)
 //color:要填充的颜色
@@ -304,18 +321,6 @@ void gui_fill_rectangle(u16 x0, u16 y0, u16 width, u16 height)
 }
 
 
-/*****************************************************************************
- * @name       :void gui_draw_triangle(u16 x0,u16 y0,u16 x1,u16 y1,u16 x2,u16 y2)
- * @date       :2018-08-09
- * @function   :Draw a triangle at a specified position
- * @parameters :x0:the bebinning x coordinate of the triangular edge
-                y0:the bebinning y coordinate of the triangular edge
-                                x1:the vertex x coordinate of the triangular
-                                y1:the vertex y coordinate of the triangular
-                                x2:the ending x coordinate of the triangular edge
-                                y2:the ending y coordinate of the triangular edge
- * @retvalue   :None
-******************************************************************************/
 void gui_draw_triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
 {
     gui_draw_line(x0, y0, x1, y1);
@@ -331,18 +336,6 @@ static void _swap(u16 *a, u16 *b)
     *b = tmp;
 }
 
-/*****************************************************************************
- * @name       :void gui_fill_triangle(u16 x0,u16 y0,u16 x1,u16 y1,u16 x2,u16 y2)
- * @date       :2018-08-09
- * @function   :filling a triangle at a specified position
- * @parameters :x0:the bebinning x coordinate of the triangular edge
-                y0:the bebinning y coordinate of the triangular edge
-                                x1:the vertex x coordinate of the triangular
-                                y1:the vertex y coordinate of the triangular
-                                x2:the ending x coordinate of the triangular edge
-                                y2:the ending y coordinate of the triangular edge
- * @retvalue   :None
-******************************************************************************/
 void gui_fill_triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
 {
     u16 a, b, y, last;
@@ -429,17 +422,6 @@ void gui_fill_triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
     }
 }
 
-/*****************************************************************************
- * @name       :void _draw_circle_8(int xc, int yc, int x, int y, u16 c)
- * @date       :2018-08-09
- * @function   :8 symmetry circle drawing algorithm (internal call)
- * @parameters :xc:the x coordinate of the Circular center
-                yc:the y coordinate of the Circular center
-                                x:the x coordinate relative to the Circular center
-                                y:the y coordinate relative to the Circular center
-                                c:the color value of the circle
- * @retvalue   :None
-******************************************************************************/
 void _draw_circle_8(int xc, int yc, int x, int y, u16 c)
 {
     gui_draw_point_color(xc + x, yc + y, c);
@@ -788,6 +770,24 @@ void gui_alphablend_area(u16 x, u16 y, u16 width, u16 height, u16 color, u8 aval
     }
 }
 
+void gui_draw_image(u16 x, u16 y, u16 width, u16 height, const u8 *img)
+{
+    u16 temp = 0;
+    long tmp = 0, num = 0;
+
+    LCD_SetWindow(x, y, width, height);
+
+    num = width * height * 2 ;
+    do
+    {
+        temp = img[tmp + 1];
+        temp = temp << 8;
+        temp = temp | img[tmp];
+        LCD_WriteWord(temp);//逐点显示
+        tmp += 2;
+    } while (tmp < num);
+}
+
 //在指定位置显示一个字符
 //x,y:起始坐标
 //num:要显示的字符:" "--->"~"
@@ -927,25 +927,13 @@ void gui_show_num(u16 x, u16 y, u32 num, u8 len, u8 size)
     }
 }
 
-/*****************************************************************************
- * @name       :void gui_draw_font16(u16 x, u16 y, u16 fc, u16 bc, u8 *s,u8 mode)
- * @date       :2018-08-09
- * @function   :Display a single 16x16 Chinese character
- * @parameters :x:the bebinning x coordinate of the Chinese character
-                y:the bebinning y coordinate of the Chinese character
-                                fc:the color value of Chinese character
-                                bc:the background color of Chinese character
-                                s:the start address of the Chinese character
-                                mode:0-no overlying,1-overlying
- * @retvalue   :None
-******************************************************************************/
 void gui_draw_font16(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
 {
     u8 i, j;
     u16 k;
     u16 HZnum;
     u16 x0 = x;
-    
+
     HZnum = sizeof(tfont16) / sizeof(typFNT_GB16); //自动统计汉字数目
 
     for (k = 0; k < HZnum; k++)
@@ -974,7 +962,7 @@ void gui_draw_font16(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
                         {
                             gui_draw_point_color(x, y, fc);    //画一个点
                         }
-                        
+
                         x++;
                         if ((x - x0) == 16)
                         {
@@ -992,18 +980,6 @@ void gui_draw_font16(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
     LCD_SetWindow(0, 0, lcddev.width, lcddev.height); //恢复窗口为全屏
 }
 
-/*****************************************************************************
- * @name       :void gui_draw_font24(u16 x, u16 y, u16 fc, u16 bc, u8 *s,u8 mode)
- * @date       :2018-08-09
- * @function   :Display a single 24x24 Chinese character
- * @parameters :x:the bebinning x coordinate of the Chinese character
-                y:the bebinning y coordinate of the Chinese character
-                                fc:the color value of Chinese character
-                                bc:the background color of Chinese character
-                                s:the start address of the Chinese character
-                                mode:0-no overlying,1-overlying
- * @retvalue   :None
-******************************************************************************/
 void gui_draw_font24(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
 {
     u8 i, j;
@@ -1038,7 +1014,7 @@ void gui_draw_font24(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
                         {
                             gui_draw_point_color(x, y, fc);    //画一个点
                         }
-                        
+
                         x++;
                         if ((x - x0) == 24)
                         {
@@ -1058,18 +1034,6 @@ void gui_draw_font24(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
     LCD_SetWindow(0, 0, lcddev.width, lcddev.height); //恢复窗口为全屏
 }
 
-/*****************************************************************************
- * @name       :void gui_draw_font32(u16 x, u16 y, u16 fc, u16 bc, u8 *s,u8 mode)
- * @date       :2018-08-09
- * @function   :Display a single 32x32 Chinese character
- * @parameters :x:the bebinning x coordinate of the Chinese character
-                y:the bebinning y coordinate of the Chinese character
-                                fc:the color value of Chinese character
-                                bc:the background color of Chinese character
-                                s:the start address of the Chinese character
-                                mode:0-no overlying,1-overlying
- * @retvalue   :None
-******************************************************************************/
 void gui_draw_font32(u16 x, u16 y, u16 fc, u16 bc, u8 *s, u8 mode)
 {
     u8 i, j;
@@ -1162,7 +1126,7 @@ void gui_show_string(u16 x, u16 y, u16 fc, u16 bc, u8 *str, u8 size, u8 mode)
                         x += size / 2; //字符,为全字的一半
                     }
                 }
-                
+
                 str++;
             }
         }
@@ -1172,7 +1136,7 @@ void gui_show_string(u16 x, u16 y, u16 fc, u16 bc, u8 *str, u8 size, u8 mode)
             {
                 return;
             }
-            
+
             bHz = 0; //有汉字库
             if (size == 32)
             {
@@ -1193,23 +1157,11 @@ void gui_show_string(u16 x, u16 y, u16 fc, u16 bc, u8 *str, u8 size, u8 mode)
     }
 }
 
-/*****************************************************************************
- * @name       :void gui_show_string_center(u16 x, u16 y, u16 fc, u16 bc, u8 *str,u8 size,u8 mode)
- * @date       :2018-08-09
- * @function   :Centered display of English and Chinese strings
- * @parameters :x:the bebinning x coordinate of the Chinese and English strings
-                y:the bebinning y coordinate of the Chinese and English strings
-                                fc:the color value of Chinese and English strings
-                                bc:the background color of Chinese and English strings
-                                str:the start address of the Chinese and English strings
-                                size:the size of Chinese and English strings
-                                mode:0-no overlying,1-overlying
- * @retvalue   :None
-******************************************************************************/
 void gui_show_string_center(u16 x, u16 y, u16 fc, u16 bc, u8 *str, u8 size, u8 mode)
 {
     u16 len = strlen((const char *)str);
     u16 x1 = (lcddev.width - len * 8) / 2;
+    
     gui_show_string(x1, y, fc, bc, str, size, mode);
 }
 

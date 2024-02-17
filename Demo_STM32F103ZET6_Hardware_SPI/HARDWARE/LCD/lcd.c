@@ -28,7 +28,7 @@
 //    SDI(MOSI)      接          PB15         //液晶屏SPI总线数据写信号
 //    SDO(MISO)      接          PB14         //液晶屏SPI总线数据读信号，如果不需要读，可以不接线
 //=======================================液晶屏控制线接线==========================================//
-//     LCD模块 					      STM32单片机
+//     LCD模块                        STM32单片机
 //       LED         接          PB9          //液晶屏背光控制信号，如果不需要控制，接5V或3.3V
 //       SCK         接          PB13         //液晶屏SPI总线时钟信号
 //      DC/RS        接          PB10         //液晶屏数据/命令控制信号
@@ -36,7 +36,7 @@
 //       CS          接          PB11         //液晶屏片选控制信号
 //=========================================触摸屏触接线=========================================//
 //如果模块不带触摸功能或者带有触摸功能，但是不需要触摸功能，则不需要进行触摸屏接线
-//	   LCD模块                STM32单片机
+//     LCD模块                STM32单片机
 //      T_IRQ        接          PC10         //触摸屏触摸中断信号
 //      T_DO         接          PC2          //触摸屏SPI总线读信号
 //      T_DIN        接          PC3          //触摸屏SPI总线写信号
@@ -52,18 +52,23 @@
  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
 **************************************************************************************************/
-#include "lcd.h"
+#include "sys.h"
 #include "stdlib.h"
+#include "lcd.h"
 #include "delay.h"
 #include "SPI.h"
+
+//定义LCD的尺寸
+#define LCD_W 240
+#define LCD_H 320
 
 
 //管理LCD重要参数
 //默认为竖屏
-_lcd_dev lcddev;
+lcd_dev_t lcddev;
 
 //画笔颜色,背景颜色
-u16 PAINT_COLOR = 0x0000, BACK_COLOR = 0xFFFF;
+u16 PAINT_COLOR = BLACK, BACK_COLOR = WHITE;
 
 //写寄存器函数
 //reg:寄存器值
@@ -102,7 +107,7 @@ void LCD_WriteWord(u16 color)
 void LCD_GPIOInit(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	//使能GPIOB时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);   //使能GPIOB时钟
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12; //GPIOB9,10,11,12
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   //推挽输出
@@ -131,7 +136,7 @@ u16 LCD_ReadPoint(u16 x, u16 y)
     {
         return 0;    //超过了范围,直接返回
     }
-    
+
     LCD_SetWindow(x, y, 1, 1);
 
     return LCD_ReadRamData();
@@ -146,7 +151,7 @@ u16 LCD_ReadPoint(u16 x, u16 y)
 ******************************************************************************/
 void LCD_WriteRAM_Prepare(void)
 {
-    LCD_SelectReg(lcddev.wramcmd);
+    LCD_SelectReg(0x2C);
 }
 
 /*****************************************************************************
@@ -164,23 +169,6 @@ void LCD_RESET(void)
     delay_ms(50);
 }
 
-//清屏函数
-//color:要清屏的填充色
-void LCD_Clear(u16 Color)
-{
-    unsigned int i, j;
-    
-    LCD_SetWindow(0, 0, lcddev.width, lcddev.height);
-
-    for (i = 0; i < lcddev.height; i++)
-    {
-        for (j = 0; j < lcddev.width; j++)
-        {
-            LCD_WriteWord(Color);
-        }
-    }
-}
-
 /*****************************************************************************
  * @name       :void LCD_RESET(void)
  * @date       :2018-08-09
@@ -193,6 +181,7 @@ void LCD_Init(void)
     SPI2_Init(); //硬件SPI2初始化
     LCD_GPIOInit();//LCD GPIO初始化
     LCD_RESET(); //LCD 复位
+    
     //*************2.4inch ILI9341初始化**********//
     LCD_SelectReg(0xCF);
     LCD_WriteByte(0x00);
@@ -223,8 +212,8 @@ void LCD_Init(void)
     LCD_SelectReg(0xC1);    //Power control
     LCD_WriteByte(0x12);   //SAP[2:0];BT[3:0] 0x01
     LCD_SelectReg(0xC5);    //VCM control
-    LCD_WriteByte(0x08); 	 //30
-    LCD_WriteByte(0x26); 	 //30
+    LCD_WriteByte(0x08);     //30
+    LCD_WriteByte(0x26);     //30
     LCD_SelectReg(0xC7);    //VCM control2
     LCD_WriteByte(0XB7);
     LCD_SelectReg(0x36);    // Memory Access Control
@@ -289,7 +278,6 @@ void LCD_Init(void)
 
     LCD_Direction(USE_HORIZONTAL);//设置LCD显示方向
     LCD_BL_ON(); //点亮背光
-    LCD_Clear(WHITE);//清全屏白色
 }
 
 //设置窗口,并自动设置画点坐标到窗口左上角(sx,sy).
@@ -298,32 +286,19 @@ void LCD_Init(void)
 //窗体大小:width*height.
 void LCD_SetWindow(u16 sx, u16 sy, u16 width, u16 height)
 {
-    LCD_SelectReg(lcddev.setxcmd);
+    LCD_SelectReg(0x2A);
     LCD_WriteByte(sx >> 8);
     LCD_WriteByte(0x00FF & sx);
     LCD_WriteByte((sx + width - 1) >> 8);
     LCD_WriteByte(0x00FF & (sx + width - 1));
 
-    LCD_SelectReg(lcddev.setycmd);
+    LCD_SelectReg(0x2B);
     LCD_WriteByte(sy >> 8);
     LCD_WriteByte(0x00FF & sy);
     LCD_WriteByte((sy + height - 1) >> 8);
     LCD_WriteByte(0x00FF & (sy + height - 1));
 
-    LCD_WriteRAM_Prepare();	//开始写入GRAM
-}
-
-/*****************************************************************************
- * @name       :void LCD_SetCursor(u16 Xpos, u16 Ypos)
- * @date       :2018-08-09
- * @function   :Set coordinate value
- * @parameters :Xpos:the  x coordinate of the pixel
-								Ypos:the  y coordinate of the pixel
- * @retvalue   :None
-******************************************************************************/
-void LCD_SetCursor(u16 Xpos, u16 Ypos)
-{
-    LCD_SetWindow(Xpos, Ypos, 1, 1);
+    LCD_WriteRAM_Prepare(); //开始写入GRAM
 }
 
 /*****************************************************************************
@@ -332,58 +307,41 @@ void LCD_SetCursor(u16 Xpos, u16 Ypos)
  * @function   :Setting the display direction of LCD screen
  * @parameters :direction:0-0 degree
                           1-90 degree
-													2-180 degree
-													3-270 degree
+                                                    2-180 degree
+                                                    3-270 degree
  * @retvalue   :None
 ******************************************************************************/
 void LCD_Direction(u8 direction)
 {
-    lcddev.setxcmd = 0x2A;
-    lcddev.setycmd = 0x2B;
-    lcddev.wramcmd = 0x2C;
     switch (direction)
     {
         case 0:
             lcddev.width = LCD_W;
             lcddev.height = LCD_H;
+            lcddev.direction = direction;
             LCD_WriteReg(0x36, (1 << 3) | (0 << 6) | (0 << 7)); //BGR==1,MY==0,MX==0,MV==0
             break;
         case 1:
             lcddev.width = LCD_H;
             lcddev.height = LCD_W;
+            lcddev.direction = direction;
             LCD_WriteReg(0x36, (1 << 3) | (0 << 7) | (1 << 6) | (1 << 5)); //BGR==1,MY==1,MX==0,MV==1
             break;
         case 2:
             lcddev.width = LCD_W;
             lcddev.height = LCD_H;
+            lcddev.direction = direction;
             LCD_WriteReg(0x36, (1 << 3) | (1 << 6) | (1 << 7)); //BGR==1,MY==0,MX==0,MV==0
             break;
         case 3:
             lcddev.width = LCD_H;
             lcddev.height = LCD_W;
+            lcddev.direction = direction;
             LCD_WriteReg(0x36, (1 << 3) | (1 << 7) | (1 << 5)); //BGR==1,MY==1,MX==0,MV==1
             break;
         default:
             break;
     }
-}
-
-void LCD_ShowPicture(u16 x, u16 y, u16 width, u16 height, const u8 *pic)
-{
-    u16 temp = 0;
-    long tmp = 0, num = 0;
-    
-    LCD_SetWindow(x, y, width, height);
-    
-    num = width * height * 2 ;
-    do
-    {
-        temp = pic[tmp + 1];
-        temp = temp << 8;
-        temp = temp | pic[tmp];
-        LCD_WriteWord(temp);//逐点显示
-        tmp += 2;
-    } while (tmp < num);
 }
 
 

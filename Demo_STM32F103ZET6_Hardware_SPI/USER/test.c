@@ -75,7 +75,7 @@ u16 ColorTab[5] = {RED, GREEN, BLUE, YELLOW, BRED}; //定义颜色数组
 void DrawTestPage(u8 *str)
 {
     //绘制固定栏up
-    LCD_Clear(WHITE);
+    gui_clear(WHITE);
     gui_fill(0, 0, lcddev.width, 20, BLUE);
     //绘制固定栏down
     gui_fill(0, lcddev.height - 20, lcddev.width, lcddev.height, BLUE);
@@ -263,11 +263,11 @@ void Pic_test(void)
 {
     DrawTestPage("测试7:图片显示测试");
     //gui_fill(0,20,lcddev.width,lcddev.height-20,WHITE);
-    LCD_ShowPicture(30, 30, 40, 40, gImage_qq);
+    gui_draw_image(30, 30, 40, 40, gImage_qq);
     gui_show_string(30 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
-    LCD_ShowPicture(90, 30, 40, 40, gImage_qq);
+    gui_draw_image(90, 30, 40, 40, gImage_qq);
     gui_show_string(90 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
-    LCD_ShowPicture(150, 30, 40, 40, gImage_qq);
+    gui_draw_image(150, 30, 40, 40, gImage_qq);
     gui_show_string(150 + 12, 75, BLUE, YELLOW, "QQ", 16, 1);
     delay_ms(1200);
 }
@@ -289,7 +289,7 @@ void Rotate_Test(void)
         LCD_Direction(i);
         DrawTestPage("测试8:屏幕旋转测试");
         gui_show_string(20, 30, BLUE, YELLOW, Direction[i], 16, 1);
-        LCD_ShowPicture(30, 50, 40, 40, gImage_qq);
+        gui_draw_image(30, 50, 40, 40, gImage_qq);
         delay_ms(1000);
         delay_ms(1000);
     }
@@ -352,7 +352,7 @@ void Touch_Test(void)
         if (key == 1) //KEY_RIGHT按下,则执行校准程序
         {
 
-            LCD_Clear(WHITE);//清屏
+            gui_clear(WHITE);//清屏
             TP_Adjust();  //屏幕校准
             TP_Save_Adjdata();
             DrawTestPage("测试9:Touch(按KEY0校准)      ");
